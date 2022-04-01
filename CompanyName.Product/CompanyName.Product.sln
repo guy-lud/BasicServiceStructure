@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AB648B45-0AB1-4158-8D37-6E6A58902408}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{F1ED903E-642F-4E4C-88B2-FB61C7869822}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompanyName.Product", "src\CompanyName.Product\CompanyName.Product.csproj", "{FFF4B427-561D-4879-B0E6-5161C116D292}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFF4B427-561D-4879-B0E6-5161C116D292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFF4B427-561D-4879-B0E6-5161C116D292}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFF4B427-561D-4879-B0E6-5161C116D292}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFF4B427-561D-4879-B0E6-5161C116D292}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F1ED903E-642F-4E4C-88B2-FB61C7869822} = {AB648B45-0AB1-4158-8D37-6E6A58902408}
+		{FFF4B427-561D-4879-B0E6-5161C116D292} = {F1ED903E-642F-4E4C-88B2-FB61C7869822}
+	EndGlobalSection
+EndGlobal
