@@ -1,10 +1,17 @@
+using System.Net;
 using HealthChecks.UI.Client;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 
 namespace CompanyName.Product;
 
+
+public class MyException : Exception
+{
+    public HttpStatusCode Code { get; set; }
+}
 
 public class Startup
 {
@@ -18,6 +25,14 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public virtual void ConfigureServices(IServiceCollection services)
     {
+
+        services.AddProblemDetails(dude =>
+        {
+            dude.Map<MyException>(x =>
+            {
+                return new StatusCodeProblemDetails((int)x.Code);
+            });
+        });
         
         RegisterAppInsights(services);
 
@@ -38,22 +53,22 @@ public class Startup
                 Description = "Service HTTP API"
             });
 
-            options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.OAuth2,
-                Flows = new OpenApiOAuthFlows()
-                {
-                    Implicit = new OpenApiOAuthFlow()
-                    {
-                        AuthorizationUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrlExternal")}/connect/authorize"),
-                        TokenUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrlExternal")}/connect/token"),
-                        Scopes = new Dictionary<string, string>()
-                        {
-                            { "basket", "Basket API" }
-                        }
-                    }
-                }
-            });
+            // options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+            // {
+            //     Type = SecuritySchemeType.OAuth2,
+            //     Flows = new OpenApiOAuthFlows()
+            //     {
+            //         Implicit = new OpenApiOAuthFlow()
+            //         {
+            //             AuthorizationUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrlExternal")}/connect/authorize"),
+            //             TokenUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrlExternal")}/connect/token"),
+            //             Scopes = new Dictionary<string, string>()
+            //             {
+            //                 { "basket", "Basket API" }
+            //             }
+            //         }
+            //     }
+            // });
 
             //options.OperationFilter<AuthorizeCheckOperationFilter>();
         });
@@ -75,7 +90,9 @@ public class Startup
         //loggerFactory.AddAzureWebAppDiagnostics();
         //loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Trace);
 
-        var pathBase = Configuration["PATH_BASE"];
+        app.UseProblemDetails();
+
+            var pathBase = Configuration["PATH_BASE"];
         if (!string.IsNullOrEmpty(pathBase))
         {
             app.UsePathBase(pathBase);
@@ -104,6 +121,14 @@ public class Startup
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            endpoints.MapGet("/test", context =>
+            {
+                throw new MyException()
+                {
+                    Code = HttpStatusCode.Unauthorized
+                };
             });
             
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
