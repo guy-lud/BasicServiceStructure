@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 
 namespace CompanyName.Product;
 
-
 public class MyException : Exception
 {
     public HttpStatusCode Code { get; set; }
@@ -25,27 +24,23 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public virtual void ConfigureServices(IServiceCollection services)
     {
-
         services.AddProblemDetails(dude =>
         {
-            dude.Map<MyException>(x =>
-            {
-                return new StatusCodeProblemDetails((int)x.Code);
-            });
+            dude.IncludeExceptionDetails = (context, exception) => true;
+            dude.Map<MyException>(x => { return new StatusCodeProblemDetails((int)x.Code); });
         });
-        
+
         RegisterAppInsights(services);
 
         services.AddControllers(options =>
             {
                 //options.Filters.Add(typeof(HttpGlobalExceptionFilter/));
-
             }) // Added for functional tests
             //.AddApplicationPart(typeof(BasketController).Assembly)
             .AddJsonOptions(options => options.JsonSerializerOptions.WriteIndented = true);
 
         services.AddSwaggerGen(options =>
-        {            
+        {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "XXX HTTP API",
@@ -73,10 +68,9 @@ public class Startup
             //options.OperationFilter<AuthorizeCheckOperationFilter>();
         });
 
-        //ConfigureAuthService(services);
 
         services.AddCustomHealthCheck(Configuration);
-        
+
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddOptions();
@@ -87,12 +81,11 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
     {
-        //loggerFactory.AddAzureWebAppDiagnostics();
         //loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Trace);
 
         app.UseProblemDetails();
 
-            var pathBase = Configuration["PATH_BASE"];
+        var pathBase = Configuration["PATH_BASE"];
         if (!string.IsNullOrEmpty(pathBase))
         {
             app.UsePathBase(pathBase);
@@ -101,14 +94,14 @@ public class Startup
         app.UseSwagger()
             .UseSwaggerUI(setup =>
             {
-                setup.SwaggerEndpoint($"{ (!string.IsNullOrEmpty(pathBase) ? pathBase : string.Empty) }/swagger/v1/swagger.json", "Basket.API V1");
+                setup.SwaggerEndpoint(
+                    $"{(!string.IsNullOrEmpty(pathBase) ? pathBase : string.Empty)}/swagger/v1/swagger.json",
+                    "Basket.API V1");
                 setup.OAuthClientId("basketswaggerui");
                 setup.OAuthAppName("Basket Swagger UI");
             });
 
         app.UseRouting();
-        app.UseCors("CorsPolicy");
-        ConfigureAuth(app);
 
         app.UseStaticFiles();
 
@@ -116,7 +109,7 @@ public class Startup
         {
             endpoints.MapDefaultControllerRoute();
             endpoints.MapControllers();
-          
+
             endpoints.MapHealthChecks("/hc", new HealthCheckOptions()
             {
                 Predicate = _ => true,
@@ -130,7 +123,7 @@ public class Startup
                     Code = HttpStatusCode.Unauthorized
                 };
             });
-            
+
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
             {
                 Predicate = r => r.Name.Contains("self")
@@ -143,37 +136,13 @@ public class Startup
         services.AddApplicationInsightsTelemetry(Configuration);
         services.AddApplicationInsightsKubernetesEnricher();
     }
-
-    private void ConfigureAuthService(IServiceCollection services)
-    {
-        // prevent from mapping "sub" claim to nameidentifier.
-    //     JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
-    //
-    //     var identityUrl = Configuration.GetValue<string>("IdentityUrl");
-    //
-    //     services.AddAuthentication(options =>
-    //     {
-    //         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    //
-    //     }).AddJwtBearer(options =>
-    //     {
-    //         options.Authority = identityUrl;
-    //         options.RequireHttpsMetadata = false;
-    //         options.Audience = "basket";
-    //     });
-    }
-
-    protected virtual void ConfigureAuth(IApplicationBuilder app)
-    {
-        app.UseAuthentication();
-        app.UseAuthorization();
-    }
+    
 }
 
 public static class CustomExtensionMethods
 {
-    public static IServiceCollection AddCustomHealthCheck(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCustomHealthCheck(this IServiceCollection services,
+        IConfiguration configuration)
     {
         var hcBuilder = services.AddHealthChecks();
 
