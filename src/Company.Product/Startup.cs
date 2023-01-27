@@ -1,9 +1,8 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.OpenApi.Models;
 
-namespace CompanyName.Product;
+namespace Company.Product;
 
 
 public class Startup

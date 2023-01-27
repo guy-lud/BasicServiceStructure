@@ -1,35 +1,38 @@
 using System.Net;
-using CompanyName.Product.Infrastructure.Middleware;
+using Company.Product.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Serilog;
 
-namespace CompanyName.Product.Bootstrap;
+namespace Company.Product.Bootstrap;
 
 public static partial class BootstrapUtils
 {
     internal static WebApplicationBuilder CreateStandardWebHostBuilder(IConfiguration configuration, string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-    
-        builder.WebHost
-            .CaptureStartupErrors(false)
-            .ConfigureKestrel(options =>
+        
+        builder.Host
+            .UseSerilog()
+            .ConfigureWebHost(webHostBuilder =>
             {
-                var ports = GetDefinedPorts(configuration);
-                options.Listen(IPAddress.Any, ports.httpPort,
-                    listenOptions => { listenOptions.Protocols = HttpProtocols.Http1AndHttp2; });
+                webHostBuilder.CaptureStartupErrors(false)
+                    .ConfigureKestrel(options =>
+                    {
+                        var ports = GetDefinedPorts(configuration);
+                        options.Listen(IPAddress.Any, ports.httpPort,
+                            listenOptions => { listenOptions.Protocols = HttpProtocols.Http1AndHttp2; });
 
-                options.Listen(IPAddress.Any, ports.grpcPort,
-                    listenOptions => { listenOptions.Protocols = HttpProtocols.Http2; });
-            })
-            .ConfigureAppConfiguration(x => x.AddConfiguration(configuration))
-            .UseFailing(options =>
-            {
-                options.ConfigPath = "/Failing";
-                options.NotFilteredPaths.AddRange(new[] { "/hc", "/liveness" });
-            })
-            .UseContentRoot(Directory.GetCurrentDirectory())
-            .UseSerilog();
+                        options.Listen(IPAddress.Any, ports.grpcPort,
+                            listenOptions => { listenOptions.Protocols = HttpProtocols.Http2; });
+                    })
+                    .ConfigureAppConfiguration(x => x.AddConfiguration(configuration))
+                    .UseFailing(options =>
+                    {
+                        options.ConfigPath = "/Failing";
+                        options.NotFilteredPaths.AddRange(new[] { "/hc", "/liveness" });
+                    })
+                    .UseContentRoot(Directory.GetCurrentDirectory());
+            });
 
         return builder;
     }
@@ -52,7 +55,7 @@ public static partial class BootstrapUtils
         return builder.Build();
     }
     
-    internal static Serilog.ILogger CreateSerilogLogger(IConfiguration configuration, string applicationName)
+    internal static Serilog.ILogger CreateSerilogLogger(IConfiguration configuration, string? applicationName)
     {
         return new LoggerConfiguration()
             .MinimumLevel.Verbose()

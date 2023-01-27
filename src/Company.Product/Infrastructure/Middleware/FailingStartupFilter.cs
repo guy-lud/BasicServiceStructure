@@ -1,9 +1,9 @@
-namespace CompanyName.Product.Infrastructure.Middleware;
+namespace Company.Product.Infrastructure.Middleware;
 
 public class FailingStartupFilter : IStartupFilter
 {
-    private readonly Action<FailingOptions> _options;
-    public FailingStartupFilter(Action<FailingOptions> optionsAction)
+    private readonly Action<FailingOptions>? _options;
+    public FailingStartupFilter(Action<FailingOptions>? optionsAction)
     {
         _options = optionsAction;
     }

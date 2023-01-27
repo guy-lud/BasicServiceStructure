@@ -2,25 +2,23 @@ using ExistsForAll.Shepherd.SimpleInjector;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 
-namespace CompanyName.Product.Bootstrap;
+namespace Company.Product.Bootstrap;
 
 public static partial class BootstrapUtils
 {
-    internal static void SimpleInjectorComposeRoot(IServiceCollection services, Container container)
+    internal static WebApplicationBuilder SimpleInjectorComposeRoot(this WebApplicationBuilder webApplicationBuilder, Container container)
     {
+        var services = webApplicationBuilder.Services;
         container.Scan(x => x.WithAssembly<Program>());
         
         services.AddSimpleInjector(container, options =>
         {
-            options.AddAspNetCore()
+            options.AddLogging()
+                .AddAspNetCore()
                 .AddControllerActivation();
-
-            options.AddLogging();
-            options.AddLocalization(); //?
         });
 
-        
-        
+        return webApplicationBuilder;
     }
 
     internal static Container CreateSimpleInjectorContainer()

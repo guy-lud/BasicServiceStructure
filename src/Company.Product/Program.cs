@@ -1,15 +1,14 @@
 using Serilog;
 using SimpleInjector;
-using static CompanyName.Product.Bootstrap.BootstrapUtils;
+using static Company.Product.Bootstrap.BootstrapUtils;
 
 var configuration = GetConfiguration();
 
-var applicationName = configuration.GetValue<string>("ApplicationName", "no-name");
+var applicationName = configuration.GetValue<string?>("ApplicationName", "no-name");
 
 Log.Logger = CreateSerilogLogger(configuration, applicationName);
 
 var container = CreateSimpleInjectorContainer();
-
 
 try
 {
@@ -17,16 +16,14 @@ try
 
     var hostBuilder = CreateStandardWebHostBuilder(configuration, args);
 
-    ComposeRoot(hostBuilder.Services, configuration);
+    var app = hostBuilder.ComposeRoot(configuration)
+        .SimpleInjectorComposeRoot(container)
+        .Build();
 
-    SimpleInjectorComposeRoot(hostBuilder.Services, container);
-
-    var app = hostBuilder.Build();
-    
-    app.Services.UseSimpleInjector(container);
-    
     Log.Information("Starting web host ({ApplicationContext})...", applicationName);
 
+    app.UseSimpleInjector(container);
+    
     await app.RunAsync();
 
     return 0;

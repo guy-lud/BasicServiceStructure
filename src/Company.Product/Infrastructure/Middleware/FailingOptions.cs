@@ -1,4 +1,4 @@
-namespace CompanyName.Product.Infrastructure.Middleware;
+namespace Company.Product.Infrastructure.Middleware;
 
 public class FailingOptions
 {

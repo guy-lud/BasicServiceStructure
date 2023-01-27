@@ -1,8 +1,8 @@
-namespace CompanyName.Product.Infrastructure.Middleware;
+namespace Company.Product.Infrastructure.Middleware;
 
 public static class WebHostBuildertExtensions
 {
-    public static IWebHostBuilder UseFailing(this IWebHostBuilder builder, Action<FailingOptions> options)
+    public static IWebHostBuilder UseFailing(this IWebHostBuilder builder, Action<FailingOptions>? options)
     {
         builder.ConfigureServices(services =>
         {

@@ -348,7 +348,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-
-/CompanyName.Product/.idea/.idea.CompanyName.Product/.idea
-/CompanyName.Product/.idea/.idea.CompanyName.Product/.idea
-/.idea
+.idea

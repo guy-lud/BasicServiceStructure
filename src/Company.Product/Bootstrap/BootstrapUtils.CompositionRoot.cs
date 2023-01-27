@@ -1,15 +1,16 @@
-using Microsoft.OpenApi.Models;
 using ExistForAll.SimpleSettings;
 using ExistForAll.SimpleSettings.Binders;
 using ExistForAll.SimpleSettings.Extensions.GenericHost;
+using Microsoft.OpenApi.Models;
 
-namespace CompanyName.Product.Bootstrap;
+namespace Company.Product.Bootstrap;
 
 public static partial class BootstrapUtils
 {
-    internal static void ComposeRoot(IServiceCollection services, IConfiguration configuration)
+    internal static WebApplicationBuilder ComposeRoot(this WebApplicationBuilder applicationBuilder, IConfiguration configuration)
     {
-
+        var services = applicationBuilder.Services; 
+        
         RegisterAppInsights(services, configuration);
 
         services.AddControllers(options =>
@@ -28,25 +29,6 @@ public static partial class BootstrapUtils
                 Version = "v1",
                 Description = "Service HTTP API"
             });
-
-            options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.OAuth2,
-                Flows = new OpenApiOAuthFlows()
-                {
-                    Implicit = new OpenApiOAuthFlow()
-                    {
-                        AuthorizationUrl = new Uri($"{configuration.GetValue<string>("IdentityUrlExternal")}/connect/authorize"),
-                        TokenUrl = new Uri($"{configuration.GetValue<string>("IdentityUrlExternal")}/connect/token"),
-                        Scopes = new Dictionary<string, string>()
-                        {
-                            { "basket", "Basket API" }
-                        }
-                    }
-                }
-            });
-
-            //options.OperationFilter<AuthorizeCheckOperationFilter>();
         });
 
         services.AddSimpleSettings(builder =>
@@ -63,6 +45,8 @@ public static partial class BootstrapUtils
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddOptions();
+
+        return applicationBuilder;
     }
     
     private static void RegisterAppInsights(IServiceCollection services, IConfiguration configuration)
